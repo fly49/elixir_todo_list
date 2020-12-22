@@ -1,4 +1,4 @@
-defmodule TodoTest do
+defmodule TodoTest.List do
   use ExUnit.Case
   #doctest Todo
 
