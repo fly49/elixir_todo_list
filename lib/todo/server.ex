@@ -1,8 +1,9 @@
 defmodule Todo.Server do
   use GenServer
+  alias Todo.List
   
   def start do
-    GenServer.start(Todo.Server, nil)
+    GenServer.start(__MODULE__, nil)
   end
 
   def add_entry(pid, new_entry) do
@@ -15,16 +16,16 @@ defmodule Todo.Server do
 
   @impl GenServer
   def init(_) do
-    {:ok, Todo.List.new()}
+    {:ok, List.new()}
   end
 
   @impl GenServer
   def handle_cast({:add_entry, entry}, todo_list) do
-    {:noreply, Todo.List.add_entry(todo_list, entry)}
+    {:noreply, List.add_entry(todo_list, entry)}
   end
 
   @impl GenServer
   def handle_call({:entries, date}, _, todo_list) do
-    {:reply, Todo.List.entries(todo_list, date), todo_list}
+    {:reply, List.entries(todo_list, date), todo_list}
   end
 end

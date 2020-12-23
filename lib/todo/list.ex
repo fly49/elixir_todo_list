@@ -1,10 +1,11 @@
 defmodule Todo.List do
   defstruct auto_id: 1, entries: %{}
+  alias Todo.List
 
   def new(entries \\ []) do
     Enum.reduce(
       entries,
-      %Todo.List{},
+      %List{},
       fn entry, todo_list_acc ->
         add_entry(todo_list_acc, entry)
       end
@@ -20,7 +21,7 @@ defmodule Todo.List do
       entry
     )
 
-    %Todo.List{todo_list |
+    %List{todo_list |
       entries: new_entries,
       auto_id: todo_list.auto_id + 1
     }
@@ -44,10 +45,10 @@ defmodule Todo.List do
       {:ok, old_entry} ->
         new_entry = updater_fun.(old_entry)
         new_entries = Map.put(todo_list.entries, new_entry.id, new_entry)
-        %Todo.List{todo_list | entries: new_entries}
+        %List{todo_list | entries: new_entries}
     end
   end
 
   def delete_entry(todo_list, id) do
-    %Todo.List{todo_list | entries: Map.delete(todo_list.entries, id) } end
+    %List{todo_list | entries: Map.delete(todo_list.entries, id) } end
 end
