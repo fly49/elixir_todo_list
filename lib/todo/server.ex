@@ -3,6 +3,7 @@ defmodule Todo.Server do
   alias Todo.{List, Database}
   
   def start(list_name) do
+    IO.puts("Starting to-do server for #{list_name}.")
     GenServer.start(__MODULE__, list_name)
   end
 
