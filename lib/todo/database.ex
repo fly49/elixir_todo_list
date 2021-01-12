@@ -9,7 +9,7 @@ defmodule Todo.Database do
     Supervisor.start_link(children, strategy: :one_for_one)
   end
 
-  def worker_spec(worker_id) do
+  defp worker_spec(worker_id) do
     default_worker_spec = {Todo.DatabaseWorker, {@db_folder, worker_id}}
     Supervisor.child_spec(default_worker_spec, id: worker_id)
   end
@@ -23,11 +23,15 @@ defmodule Todo.Database do
   end
 
   def store(key, data) do
-    Todo.DatabaseWorker.store(choose_worker(key), key, data)
+    key
+    |> choose_worker()
+    |> Todo.DatabaseWorker.store(key, data)
   end
-  
+
   def get(key) do
-    Todo.DatabaseWorker.get(choose_worker(key), key)
+    key
+    |> choose_worker()
+    |> Todo.DatabaseWorker.get(key)
   end
 
   defp choose_worker(key) do
