@@ -1,54 +1,64 @@
-defmodule TodoTest.List do
-  use ExUnit.Case
-  #doctest Todo
+defmodule TodoListTest do
+  use ExUnit.Case, async: true
 
-  test "todo_entry_map" do
-    list =
-      Todo.List.new()
-      |> Todo.List.add_entry(%{date: ~D[2018-01-01], title: "Dinner"})
-      |> Todo.List.add_entry(%{date: ~D[2018-01-02], title: "Dentist"})
-      |> Todo.List.add_entry(%{date: ~D[2018-01-02], title: "Meeting"})
-
-    assert [%{date: ~D[2018-01-01], title: "Dinner", id: 1}] == Todo.List.entries(list, ~D[2018-01-01])
-    assert [] == Todo.List.entries(list, ~D[2018-01-03])
+  test "empty list" do
+    assert Todo.List.size(Todo.List.new()) == 0
   end
 
-  test "todo_crud" do
-    list =
-      Todo.List.new()
-      |> Todo.List.add_entry(%{date: ~D[2018-01-01], title: "Dinner"})
-      |> Todo.List.add_entry(%{date: ~D[2018-01-02], title: "Dentist"})
-      |> Todo.List.add_entry(%{date: ~D[2018-01-02], title: "Meeting"})
-
-    assert [%{date: ~D[2018-01-01], id: 1, title: "Updated"}] ==
-             list
-             |> Todo.List.update_entry(1, fn entry -> %{entry | title: "Updated"} end)
-             |> Todo.List.entries(~D[2018-01-01])
-
-    assert [] ==
-             list
-             |> Todo.List.delete_entry(1)
-             |> Todo.List.entries(~D[2018-01-01])
-  end
-
-  test "todo_builder" do
-    list =
+  test "entries" do
+    todo_list =
       Todo.List.new([
-        %{date: ~D[2018-01-01], title: "Dinner"},
-        %{date: ~D[2018-01-02], title: "Dentist"},
-        %{date: ~D[2018-01-02], title: "Meeting"}
+        %{date: ~D[2018-12-19], title: "Dentist"},
+        %{date: ~D[2018-12-20], title: "Shopping"},
+        %{date: ~D[2018-12-19], title: "Movies"}
       ])
 
-    assert [%{date: ~D[2018-01-01], id: 1, title: "Dinner"}] ==
-             Todo.List.entries(list, ~D[2018-01-01])
+    assert Todo.List.size(todo_list) == 3
+    assert todo_list |> Todo.List.entries(~D[2018-12-19]) |> length() == 2
+    assert todo_list |> Todo.List.entries(~D[2018-12-20]) |> length() == 1
+    assert todo_list |> Todo.List.entries(~D[2018-12-21]) |> length() == 0
 
-    assert [] == Todo.List.entries(list, ~D[2018-01-03])
+    titles = todo_list |> Todo.List.entries(~D[2018-12-19]) |> Enum.map(& &1.title)
+    assert ["Dentist", "Movies"] = titles
   end
 
-  test "todo_import" do
-    list = Todo.List.CsvImporter.import("#{__DIR__}/todos.csv")
+  test "add_entry" do
+    todo_list =
+      Todo.List.new()
+      |> Todo.List.add_entry(%{date: ~D[2018-12-19], title: "Dentist"})
+      |> Todo.List.add_entry(%{date: ~D[2018-12-20], title: "Shopping"})
+      |> Todo.List.add_entry(%{date: ~D[2018-12-19], title: "Movies"})
 
-    assert [%{date: ~D[2018-12-20], id: 2, title: "Shopping"}] ==
-             Todo.List.entries(list, ~D[2018-12-20])
+    assert Todo.List.size(todo_list) == 3
+    assert todo_list |> Todo.List.entries(~D[2018-12-19]) |> length() == 2
+    assert todo_list |> Todo.List.entries(~D[2018-12-20]) |> length() == 1
+    assert todo_list |> Todo.List.entries(~D[2018-12-21]) |> length() == 0
+
+    titles = todo_list |> Todo.List.entries(~D[2018-12-19]) |> Enum.map(& &1.title)
+    assert ["Dentist", "Movies"] = titles
+  end
+
+  test "update_entry" do
+    todo_list =
+      Todo.List.new()
+      |> Todo.List.add_entry(%{date: ~D[2018-12-19], title: "Dentist"})
+      |> Todo.List.add_entry(%{date: ~D[2018-12-20], title: "Shopping"})
+      |> Todo.List.add_entry(%{date: ~D[2018-12-19], title: "Movies"})
+      |> Todo.List.update_entry(2, &Map.put(&1, :title, "Updated shopping"))
+
+    assert Todo.List.size(todo_list) == 3
+    assert [%{title: "Updated shopping"}] = Todo.List.entries(todo_list, ~D[2018-12-20])
+  end
+
+  test "delete_entry" do
+    todo_list =
+      Todo.List.new()
+      |> Todo.List.add_entry(%{date: ~D[2018-12-19], title: "Dentist"})
+      |> Todo.List.add_entry(%{date: ~D[2018-12-20], title: "Shopping"})
+      |> Todo.List.add_entry(%{date: ~D[2018-12-19], title: "Movies"})
+      |> Todo.List.delete_entry(2)
+
+    assert Todo.List.size(todo_list) == 2
+    assert Todo.List.entries(todo_list, ~D[2018-12-20]) == []
   end
 end

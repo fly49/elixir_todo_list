@@ -1,4 +1,4 @@
-defmodule TodoTest.Cache do
+defmodule TodoCacheTest do
   use ExUnit.Case
 
   test "server_process" do
@@ -9,9 +9,25 @@ defmodule TodoTest.Cache do
   end
 
   test "to-do operations" do
-    alice = Todo.Cache.server_process("alice")
-    Todo.Server.add_entry(alice, %{date: ~D[2018-12-19], title: "Dentist"})
-    entries = Todo.Server.entries(alice, ~D[2018-12-19])
+    jane = Todo.Cache.server_process("jane")
+    Todo.Server.add_entry(jane, %{date: ~D[2018-12-19], title: "Dentist"})
+    entries = Todo.Server.entries(jane, ~D[2018-12-19])
+
     assert [%{date: ~D[2018-12-19], title: "Dentist"}] = entries
+  end
+
+  test "persistence" do
+    john = Todo.Cache.server_process("john")
+    Todo.Server.add_entry(john, %{date: ~D[2018-12-20], title: "Shopping"})
+    assert 1 == length(Todo.Server.entries(john, ~D[2018-12-20]))
+
+    Process.exit(john, :kill)
+
+    entries =
+      "john"
+      |> Todo.Cache.server_process()
+      |> Todo.Server.entries(~D[2018-12-20])
+
+    assert [%{date: ~D[2018-12-20], title: "Shopping"}] = entries
   end
 end
