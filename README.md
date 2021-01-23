@@ -1,21 +1,14 @@
-# TodoDistributed
+# TodoList
 
-**TODO: Add description**
+## Test
 
-## Installation
+```bash
+$ iex -S mix
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `todo` to your list of dependencies in `mix.exs`:
+$ curl -d "" \
+"http://localhost:5454/add_entry?list=bob&date=2018-12-19&title=Dentist"
+OK
 
-```elixir
-def deps do
-  [
-    {:todo, "~> 0.1.0"}
-  ]
-end
+$ curl "http://localhost:5454/entries?list=bob&date=2018-12-19"
+2018-12-19 Dentist
 ```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/todo](https://hexdocs.pm/todo).
-
